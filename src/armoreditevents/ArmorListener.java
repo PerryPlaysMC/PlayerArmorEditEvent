@@ -21,13 +21,6 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
-/**
- * Copy Right ©
- * This code is private
- * Owner: PerryPlaysMC
- * From: 02/2021-Now
- **/
-
 public class ArmorListener implements Listener {
   
   private JavaPlugin plugin;

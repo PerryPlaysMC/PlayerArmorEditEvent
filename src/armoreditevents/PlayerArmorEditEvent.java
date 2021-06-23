@@ -10,15 +10,6 @@ import org.bukkit.inventory.ItemStack;
 
 import javax.annotation.Nullable;
 
-/**
- * Copy Right ©
- * This code is private
- * Owner: PerryPlaysMC
- * From: 02/2021-Now
- * <p>
- * Any attempts to use these program(s) may result in a penalty of up to $1,000 USD
- **/
-
 public class PlayerArmorEditEvent extends PlayerEvent implements Cancellable {
   
   private static final HandlerList HANDLERS = new HandlerList();
