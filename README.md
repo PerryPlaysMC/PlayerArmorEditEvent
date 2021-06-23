@@ -20,4 +20,4 @@ void onPlayerArmorEvent(PlayerArmorEditEvent e) {
   e.setForced(true);//allows any item to be worn as armor
   if(e.getNewPiece().getType() == Material.SAND) e.setForced(false);//Don't allow sand to be forced
   if(e.getNewPiece().getType() == Material.DIAMOND_CHESTPLATE) e.setCancelled(true);//Don't allow diamond chestplate to be worn
-}```
+}
