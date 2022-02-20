@@ -2,15 +2,14 @@ package armoreditevents;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
+import org.bukkit.Particle;
 import org.bukkit.block.Dispenser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
-import org.bukkit.event.inventory.ClickType;
-import org.bukkit.event.inventory.InventoryClickEvent;
-import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.*;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
@@ -28,14 +27,19 @@ public class ArmorListener implements Listener {
   
   public ArmorListener(JavaPlugin plugin) {
     this.plugin = plugin;
-    pm = Bukkit.getPluginManager();
-    boolean isRegistered = false;
-    for(RegisteredListener reg : HandlerList.getRegisteredListeners(plugin))
-      if(reg.getListener().getClass().getName().equals(getClass().getName())) {
-        isRegistered = true;
-        break;
+    String name = getClass().getName();
+    (new BukkitRunnable(){
+      @Override
+      public void run() {
+        pm = Bukkit.getPluginManager();
+        boolean isRegistered = false;
+        for(RegisteredListener reg : HandlerList.getRegisteredListeners(plugin)) if(reg.getListener().getClass().getName().equals(name)) {
+          isRegistered = true;
+          break;
+        }
+        if(!isRegistered) pm.registerEvents(ArmorListener.this, plugin);
       }
-    if(!isRegistered) pm.registerEvents(this, plugin);
+    }).runTaskLater(plugin,5);
   }
   
   @EventHandler void onInventoryClick(InventoryClickEvent e) {
@@ -46,8 +50,7 @@ public class ArmorListener implements Listener {
       ItemStack cursor = e.getCursor();
       if(isAir(cursor))return;
       if(cursor.getAmount() == cursor.getType().getMaxStackSize())return;
-      int i = -1;
-      int amount = 0;
+      int amount = 0, i = -1;
       ItemStack[] newArmor = new ItemStack[4];
       boolean changed = false;
       for(ItemStack item : armor) {
@@ -92,8 +95,8 @@ public class ArmorListener implements Listener {
       ItemStack oldItem = e.getCurrentItem();
       ItemStack newItem = e.getCursor();
       Cause cause = Cause.SET;
-      if(isAir(newItem) || e.isShiftClick() ||
-             (newItem.isSimilar(oldItem) && (newItem.getAmount() + oldItem.getAmount()) < newItem.getType().getMaxStackSize())) cause = Cause.TAKE;
+      if(isAir(newItem) || e.isShiftClick() || (newItem.isSimilar(oldItem)
+             && (newItem.getAmount() + oldItem.getAmount()) < newItem.getType().getMaxStackSize())) cause = Cause.TAKE;
       else if(!isAir(oldItem) && !isAir(newItem)) cause = Cause.SWAP;
       ArmorType aType = ArmorType.fromSlot(e.getSlot());
       PlayerArmorEditEvent event = new PlayerArmorEditEvent(player, e.getSlot(), oldItem, newItem, aType, cause);
@@ -106,7 +109,7 @@ public class ArmorListener implements Listener {
       }
       if(cause!= Cause.TAKE && (!event.getNewPiece().equals(newItem) || ((event.isAttemptNonArmor()||event.isAttemptedWrongSlot())&&event.isForced()))) {
         ItemStack newI = event.getNewPiece();
-        if(cause== Cause.SET) {
+        if(cause == Cause.SET) {
           ItemStack clone = isAir(newItem) ? new ItemStack(Material.AIR) : newItem.clone();
           if(!isAir(clone)) clone.setAmount(clone.getAmount() - event.getNewPiece().getAmount());
           e.setCursor(clone);
@@ -119,7 +122,7 @@ public class ArmorListener implements Listener {
             player.updateInventory();
             player.setItemOnCursor(oldItem);
           }
-        }).runTaskLater(plugin, 0);
+        }).runTask(plugin);
       }
       ItemStack clone = isAir(oldItem) ? new ItemStack(Material.AIR) : oldItem.clone();
       if(!event.getOldPiece().equals(oldItem) && !isAir(event.getOldPiece())) {
@@ -138,7 +141,7 @@ public class ArmorListener implements Listener {
               public void run() {
                 player.getInventory().removeItem(clone);
               }
-            }).runTaskLater(plugin, 0);
+            }).runTask(plugin);
         }
       }
       return;
@@ -163,8 +166,9 @@ public class ArmorListener implements Listener {
           player.getInventory().setItem(e.getSlot(), event.getOldPiece());
         player.getInventory().setArmorContents(armor);
       }
-    }).runTaskLater(plugin, 0);
+    }).runTask(plugin);
   }
+  
   
   @EventHandler void onBreak(PlayerItemBreakEvent e) {
     Player player = e.getPlayer();
