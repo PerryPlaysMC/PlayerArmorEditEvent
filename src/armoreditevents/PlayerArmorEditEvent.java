@@ -139,12 +139,12 @@ public class PlayerArmorEditEvent extends PlayerEvent implements Cancellable {
   public static HandlerList getHandlerList() {
     return HANDLERS;
   }
-  
-  enum Cause {
+
+  public enum Cause {
     DISPENSER, RIGHT_CLICK, TAKE, SET, SWAP, BREAK, CURSOR_COLLECT
   }
-  
-  enum ArmorType{
+
+  public enum ArmorType{
     HELMET(3) {
       @Override
       boolean isType(Material material) {
@@ -171,8 +171,8 @@ public class PlayerArmorEditEvent extends PlayerEvent implements Cancellable {
         return material.name().endsWith("_BOOTS");
       }
     };
-    
-    private int id = 0;
+
+    private final int id;
     ArmorType(int id) {
       this.id = id;
     }
