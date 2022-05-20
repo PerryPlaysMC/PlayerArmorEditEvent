@@ -1,30 +1,31 @@
-package armoreditevents;
+package dev.perryplaysmc.armoredit;
 
+import dev.perryplaysmc.armoredit.PlayerArmorEditEvent.ArmorType;
+import dev.perryplaysmc.armoredit.PlayerArmorEditEvent.Cause;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
-import org.bukkit.Particle;
 import org.bukkit.block.Dispenser;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockDispenseArmorEvent;
-import org.bukkit.event.inventory.*;
+import org.bukkit.event.inventory.ClickType;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemBreakEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.PluginManager;
-import armoreditevents.PlayerArmorEditEvent.Cause;
-import armoreditevents.PlayerArmorEditEvent.ArmorType;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
 public class ArmorListener implements Listener {
-  
-  private JavaPlugin plugin;
+
+  private final JavaPlugin plugin;
   private PluginManager pm;
-  
+
   public ArmorListener(JavaPlugin plugin) {
     this.plugin = plugin;
     String name = getClass().getName();
@@ -41,7 +42,7 @@ public class ArmorListener implements Listener {
       }
     }).runTaskLater(plugin,5);
   }
-  
+
   @EventHandler void onInventoryClick(InventoryClickEvent e) {
     Player player = (Player) e.getWhoClicked();
     ItemStack[] armor = player.getInventory().getArmorContents();
@@ -58,7 +59,7 @@ public class ArmorListener implements Listener {
         newArmor[i] = item;
         if(item==null)continue;
         if(!item.isSimilar(cursor))continue;
-        PlayerArmorEditEvent event = new PlayerArmorEditEvent(player,36+i,item,(null),ArmorType.fromSlot(36+i), Cause.CURSOR_COLLECT);
+        PlayerArmorEditEvent event = new PlayerArmorEditEvent(player,36+i,item,(null), ArmorType.fromSlot(36+i), Cause.CURSOR_COLLECT);
         pm.callEvent(event);
         if(event.isCancelled()) {
           newArmor[i] = item.clone();
@@ -168,8 +169,8 @@ public class ArmorListener implements Listener {
       }
     }).runTask(plugin);
   }
-  
-  
+
+
   @EventHandler void onBreak(PlayerItemBreakEvent e) {
     Player player = e.getPlayer();
     ArmorType aType = ArmorType.fromItem(e.getBrokenItem());
@@ -189,9 +190,9 @@ public class ArmorListener implements Listener {
       armor[aType.getId()] = event.getNewPiece();
       player.getInventory().setArmorContents(armor);
     }
-    
+
   }
-  
+
   @EventHandler void onPlayerInteractEvent(PlayerInteractEvent e) {
     if(!e.getAction().name().contains("RIGHT") || !e.hasItem()) return;
     ArmorType aType = ArmorType.fromItem(e.getItem());
@@ -213,7 +214,7 @@ public class ArmorListener implements Listener {
       player.getInventory().setArmorContents(armor);
     }
   }
-  
+
   @EventHandler void onDispense(BlockDispenseArmorEvent e) {
     if(!(e.getTargetEntity() instanceof Player))return;
     ItemStack item = e.getItem();
@@ -229,7 +230,7 @@ public class ArmorListener implements Listener {
       e.setCancelled(true);
       return;
     }
-    
+
     if(!isAir(event.getOldPiece())) {
       Dispenser dispenser = (Dispenser) e.getBlock().getState();
       dispenser.getInventory().addItem(event.getOldPiece());
@@ -239,14 +240,13 @@ public class ArmorListener implements Listener {
       player.getInventory().setArmorContents(armor);
     }
   }
-  
-  
+
   private boolean isAir(Material mat) {
     return mat.name().endsWith("AIR") && !mat.name().endsWith("AIRS");
   }
-  
+
   private boolean isAir(ItemStack item) {
     return item == null || isAir(item.getType());
   }
-  
+
 }
